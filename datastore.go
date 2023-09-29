@@ -123,6 +123,27 @@ func (a *accessor) Delete(ctx context.Context, key ds.Key) (err error) {
 	return a.ldb.Delete(key.Bytes(), &opt.WriteOptions{Sync: a.syncWrites})
 }
 
+func (a *accessor) GetAll(ctx context.Context) (KVStore map[ds.Key]string, err error) {
+	a.closeLk.RLock()
+	defer a.closeLk.RUnlock()
+
+	KVStore = make(map[ds.Key]string, 0)
+	iter := a.ldb.NewIterator(nil, nil)
+
+	for iter.Next() {
+		// Remember that the contents of the returned slice should not be modified, and
+		// only valid until the next call to Next.
+		keyBytes := iter.Key()
+		dsKey := ds.NewKey(string(keyBytes))
+		iterVal := iter.Value()
+		KVStore[dsKey] = string(iterVal)
+	}
+
+	iter.Release()
+	err = iter.Error()
+	return KVStore, err
+}
+
 func (a *accessor) Query(ctx context.Context, q dsq.Query) (dsq.Results, error) {
 	a.closeLk.RLock()
 	defer a.closeLk.RUnlock()

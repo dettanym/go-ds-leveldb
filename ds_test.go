@@ -79,6 +79,21 @@ func addTestCases(t *testing.T, d *Datastore, testcases map[string]string) {
 		}
 	}
 
+	KVStore, err := d.GetAll(bg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for k, v := range testcases {
+		dsk := ds.NewKey(k)
+		if KVStore[dsk] == "" {
+			t.Fatalf("Key %s not in KVStore retrieved by GetAll", k)
+		}
+		KVStoreVal := string(KVStore[dsk])
+		if KVStoreVal != v {
+			t.Errorf("Values mismatching: Original: %s, Retrieved: %s", v, KVStoreVal)
+		}
+	}
 }
 
 func testQuery(t *testing.T, d *Datastore) {
