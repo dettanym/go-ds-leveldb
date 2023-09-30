@@ -1,4 +1,4 @@
-module github.com/ipfs/go-ds-leveldb
+module github.com/dettanym/go-ds-leveldb
 
 require (
 	github.com/ipfs/go-datastore v0.5.0
